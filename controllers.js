@@ -13,17 +13,40 @@ const config = require('./config')
 const db = new FirebaseClient(new Firebase(config.firebaseUrl))
 const urlTable = db.child('urls')
 
-class ApiError {
+class Response {
+  constructor() {}
+}
+
+class ApiError extends Response {
   constructor(status, message) {
-    this.status = status
-    this.message = message
+    this._status = status
+    this._message = message
+  }
+
+  respond(res) {
+    res.status(this._status).send({error: this._message})
   }
 }
 
-class ApiResponse {
+class ApiResponse extends Response {
   constructor(status, data) {
-    this.status = status
-    this.data = data
+    this._status = status
+    this._data = data
+  }
+
+  respond(res) {
+    res.status(this._status).send({data: this._data})
+  }
+}
+
+class TemplateResponse extends Response {
+  constructor(template, data) {
+    this._template = template
+    this._data = data
+  }
+
+  respond(res) {
+    res.render(this._template, this._data)
   }
 }
 
@@ -35,7 +58,7 @@ const UrlRecord = immutable.Record({
 })
 
 exports.showHome = makeExpressHandler((req) => {
-  return new ApiResponse(200, {status: 'ok'})
+  return new TemplateResponse('index', {title: 'Shawty'})
 })
 
 exports.shortenUrl = makeExpressHandler((req) => {
@@ -183,8 +206,8 @@ function makeExpressHandler(handler) {
     try {
       handlerResult = handler(req)
     } catch (err) {
-      if (err instanceof ApiError) {
-        return res.status(err.status).send({error: err.message})
+      if (err instanceof Response) {
+        return err.respond(res)
       }
       return next(err)
     }
@@ -194,14 +217,15 @@ function makeExpressHandler(handler) {
         : Promise.resolve(handlerResult)
 
     promise.then((result) => {
-      if (result instanceof ApiResponse) {
-        return res.status(result.status).send({data: result.data})
+      if (result instanceof Response) {
+        return result.respond(res)
       }
       // Attempt to just send down an untyped result
       res.send(result)
     }, (err) => {
-      if (err instanceof ApiError) {
+      if (err instanceof Response) {
         return res.status(err.status).send({error: err.message})
+        return err.respond()
       }
       return next(err)
     })
