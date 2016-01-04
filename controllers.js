@@ -65,7 +65,7 @@ exports.shortenUrl = makeExpressHandler((req) => {
   const url = req.body.url && req.body.url.trim()
   const customPath = req.body.customPath && req.body.customPath.trim()
   if (!url) {
-    throw new ApiError(400, 'Missing "url" field.')
+    throw new ApiError(400, 'Missing "url" field')
   }
   if (customPath != null && !/^[A-Za-z0-9-_]+$/.test(customPath)) {
     throw new ApiError(400, 'Custom path must be in [A-Za-z0-9-_]')
@@ -106,7 +106,7 @@ exports.redirectShortPath = (req, res, next) => {
 function createCustomShortUrl(customPath, url) {
   return getUrlRecordByPath(customPath).then((urlRecord) => {
     if (urlRecord) {
-      throw new ApiError(409, `Custom path "${customPath}" is already taken.`)
+      throw new ApiError(409, `Custom path "${customPath}" is already taken`)
     }
 
     return putUrlRecord(customPath, url, /* isCustomPath */ true)
@@ -144,11 +144,10 @@ function createRandomShortUrl(url) {
  * @return {string}
  */
 function generateRandomPath() {
-  const rawString = crypto.randomBytes(4).toString('base64')
-  return rawString
-      .replace(/\+/g, 'k')
-      .replace(/\//g, 'j')
-      .substring(0, 5)
+  return crypto.randomBytes(4).toString('base64')
+    .replace(/\+/g, 'k')
+    .replace(/\//g, 'h')
+    .substring(0, 5)
 }
 
 /**
@@ -197,11 +196,11 @@ function getUrlRecordByTargetUrl(targetUrl) {
 }
 
 /**
- * @param {function(express.Request}:!Promise.<!ApiResponse>} handler
+ * @param {function(express.Request):!Promise.<!ApiResponse>} handler
  * @return {function(express.Request, express.Response)}
  */
 function makeExpressHandler(handler) {
-  return (req, res, next) => {
+  return function expressHandler(req, res, next) {
     let handlerResult
     try {
       handlerResult = handler(req)
@@ -222,10 +221,10 @@ function makeExpressHandler(handler) {
       }
       // Attempt to just send down an untyped result
       res.send(result)
-    }, (err) => {
+    })
+    .catch((err) => {
       if (err instanceof Response) {
-        return res.status(err.status).send({error: err.message})
-        return err.respond()
+        return err.respond(res)
       }
       return next(err)
     })
