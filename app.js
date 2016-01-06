@@ -29,10 +29,10 @@ app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
 // Main handlers
-app.get('/', controllers.showHome)
-app.post('/', controllers.shortenUrl)
-app.get('/:shortPath', controllers.redirectShortPath)
-app.get('/:shortPath/stat', controllers.statShortPath)
+app.route('/').get(controllers.showHome)
+app.route('/').post('/', controllers.shortenUrl)
+app.route('/:shortPath').get(controllers.redirectShortPath)
+app.route('/:shortPath/stat'.get(controllers.statShortPath)
 
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {

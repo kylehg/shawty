@@ -13,9 +13,7 @@ const config = require('./config')
 const db = new FirebaseClient(new Firebase(config.firebaseUrl))
 const urlTable = db.child('urls')
 
-class Response {
-  constructor() {}
-}
+class Response {}
 
 class ApiError extends Response {
   constructor(status, message) {
@@ -41,6 +39,7 @@ class ApiResponse extends Response {
 
 class TemplateResponse extends Response {
   constructor(template, data) {
+    // super()
     this._template = template
     this._data = data
   }
@@ -206,8 +205,10 @@ function makeExpressHandler(handler) {
       handlerResult = handler(req)
     } catch (err) {
       if (err instanceof Response) {
+        console.log('!!!', err)
         return err.respond(res)
       }
+      console.log('>>>', result)
       return next(err)
     }
 
@@ -219,6 +220,7 @@ function makeExpressHandler(handler) {
       if (result instanceof Response) {
         return result.respond(res)
       }
+      console.log('>>>', result)
       // Attempt to just send down an untyped result
       res.send(result)
     })
@@ -226,6 +228,7 @@ function makeExpressHandler(handler) {
       if (err instanceof Response) {
         return err.respond(res)
       }
+      console.log('>>>', result)
       return next(err)
     })
   }
