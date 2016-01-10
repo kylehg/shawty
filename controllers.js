@@ -66,6 +66,7 @@ class Controllers {
         shortPath: urlRecord.shortPath,
         targetUrl: urlRecord.targetUrl,
         occurredAt: Date.now(),
+        requestIp: req.ip,
         requestHeaders: req.headers,
         requestQuery: req.query,
         requestBody: req.body,

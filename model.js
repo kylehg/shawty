@@ -17,6 +17,7 @@ const UrlHit = immutable.Record({
   // This is redundant info but denormalized for funsies
   targetUrl: '',
   occurredAt: 0,
+  requestIp: '',
   requestHeaders: null,
   requestQuery: null,
   requestBody: null,
