@@ -17,6 +17,7 @@ class Response {}
 
 class ApiError extends Response {
   constructor(status, message) {
+    super()
     this._status = status
     this._message = message
   }
@@ -28,6 +29,7 @@ class ApiError extends Response {
 
 class ApiResponse extends Response {
   constructor(status, data) {
+    super()
     this._status = status
     this._data = data
   }
@@ -39,7 +41,7 @@ class ApiResponse extends Response {
 
 class TemplateResponse extends Response {
   constructor(template, data) {
-    // super()
+    super()
     this._template = template
     this._data = data
   }
@@ -205,10 +207,8 @@ function makeExpressHandler(handler) {
       handlerResult = handler(req)
     } catch (err) {
       if (err instanceof Response) {
-        console.log('!!!', err)
-        return err.respond(res)
+        err.respond(res)
       }
-      console.log('>>>', result)
       return next(err)
     }
 
@@ -218,18 +218,13 @@ function makeExpressHandler(handler) {
 
     promise.then((result) => {
       if (result instanceof Response) {
-        return result.respond(res)
+        result.respond(res)
+      } else {
+        // Attempt to just send down an untyped result
+        console.error(`Received untyped response ${result}`)
+        res.send(result)
       }
-      console.log('>>>', result)
-      // Attempt to just send down an untyped result
-      res.send(result)
     })
-    .catch((err) => {
-      if (err instanceof Response) {
-        return err.respond(res)
-      }
-      console.log('>>>', result)
-      return next(err)
-    })
+    .catch(next)
   }
 }

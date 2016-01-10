@@ -30,9 +30,9 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 // Main handlers
 app.route('/').get(controllers.showHome)
-app.route('/').post('/', controllers.shortenUrl)
+app.route('/').post(controllers.shortenUrl)
 app.route('/:shortPath').get(controllers.redirectShortPath)
-app.route('/:shortPath/stat'.get(controllers.statShortPath)
+app.route('/:shortPath/stat').get(controllers.statShortPath)
 
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
