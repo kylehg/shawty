@@ -3,7 +3,7 @@ extends layout
 block content
   div(class="container")
 
-    form(class="shortenForm js-submit ")
+    form(class="shortenForm js-shortenForm")
       h2 Enter a URL to shorten
 
       div(class="js-errorMessage alert hidden" role="alert")
@@ -16,7 +16,8 @@ block content
           class="js-inputUrl form-control"
           placeholder="http://example.com"
           required
-          autofocus)
+          autofocus
+        )
 
       div(class="form-group")
         label(for="inputCustomPath" class="sr-only") Custom path
@@ -24,4 +25,16 @@ block content
           div(class="input-group-addon")= host
           input(type="text" id="inputCustomPath" class="js-inputCustomPath form-control")
 
-      button(class="btn btn-lg btn-primary btn-block" type="submit") Shorten
+      button(class="js-submitBtn btn btn-lg btn-success btn-block" type="submit") Shorten
+
+      div(class="js-resultsFormGroup hidden input-group")
+        input(class="js-resultsField form-control" type="text" readonly)
+        div(
+          class="js-copyBtn copyBtn input-group-addon"
+          data-clipboard-target=".js-resultsField"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Copy to clipboard"
+        )
+          span(class="glyphicon glyphicon-copy" aria-hidden="true")
+          span(class="sr-only") Copy to clipboard

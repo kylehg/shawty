@@ -7,12 +7,18 @@
 var getIjData
 
 function main() {
-  $('.js-submit').on('submit', onSubmit)
+  // Attach event handlers
+  $('.js-shortenForm').on('submit', onSubmit)
+  new Clipboard('.js-copyBtn')
+  $('[data-toggle="tooltip"]').tooltip()
+
+  // Setup injected data
   var ijData = window.__ijData__
   getIjData = function getIjData(name) {
     return ijData[name]
   }
   delete window.__ijData__
+
   console.log('Main JS loaded')
 }
 
@@ -51,7 +57,9 @@ function handleSuccess(resp) {
   }
 
   clearError()
-  $('.js-inputCustomPath').val(resp.data.path).select()
+  $('.js-resultsFormGroup').removeClass('hidden')
+  $('.js-resultsField').val(resp.data.shortUrl)
+  $('.js-submitBtn').addClass('hidden')
 }
 
 /**
