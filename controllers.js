@@ -13,17 +13,41 @@ const config = require('./config')
 const db = new FirebaseClient(new Firebase(config.firebaseUrl))
 const urlTable = db.child('urls')
 
-class ApiError {
+class Response {}
+
+class ApiError extends Response {
   constructor(status, message) {
-    this.status = status
-    this.message = message
+    super()
+    this._status = status
+    this._message = message
+  }
+
+  respond(res) {
+    res.status(this._status).send({error: this._message})
   }
 }
 
-class ApiResponse {
+class ApiResponse extends Response {
   constructor(status, data) {
-    this.status = status
-    this.data = data
+    super()
+    this._status = status
+    this._data = data
+  }
+
+  respond(res) {
+    res.status(this._status).send({data: this._data})
+  }
+}
+
+class TemplateResponse extends Response {
+  constructor(template, data) {
+    super()
+    this._template = template
+    this._data = data
+  }
+
+  respond(res) {
+    res.render(this._template, this._data)
   }
 }
 
@@ -35,14 +59,17 @@ const UrlRecord = immutable.Record({
 })
 
 exports.showHome = makeExpressHandler((req) => {
-  return new ApiResponse(200, {status: 'ok'})
+  return new TemplateResponse('index', {
+    title: 'Shawty',
+    host: `${config.host}/`,
+  })
 })
 
 exports.shortenUrl = makeExpressHandler((req) => {
   const url = req.body.url && req.body.url.trim()
   const customPath = req.body.customPath && req.body.customPath.trim()
   if (!url) {
-    throw new ApiError(400, 'Missing "url" field.')
+    throw new ApiError(400, 'Missing "url" field')
   }
   if (customPath != null && !/^[A-Za-z0-9-_]+$/.test(customPath)) {
     throw new ApiError(400, 'Custom path must be in [A-Za-z0-9-_]')
@@ -83,7 +110,7 @@ exports.redirectShortPath = (req, res, next) => {
 function createCustomShortUrl(customPath, url) {
   return getUrlRecordByPath(customPath).then((urlRecord) => {
     if (urlRecord) {
-      throw new ApiError(409, `Custom path "${customPath}" is already taken.`)
+      throw new ApiError(409, `Custom path "${customPath}" is already taken`)
     }
 
     return putUrlRecord(customPath, url, /* isCustomPath */ true)
@@ -121,11 +148,10 @@ function createRandomShortUrl(url) {
  * @return {string}
  */
 function generateRandomPath() {
-  const rawString = crypto.randomBytes(4).toString('base64')
-  return rawString
-      .replace(/\+/g, 'k')
-      .replace(/\//g, 'j')
-      .substring(0, 5)
+  return crypto.randomBytes(4).toString('base64')
+    .replace(/\+/g, 'k')
+    .replace(/\//g, 'h')
+    .substring(0, 5)
 }
 
 /**
@@ -174,19 +200,20 @@ function getUrlRecordByTargetUrl(targetUrl) {
 }
 
 /**
- * @param {function(express.Request}:!Promise.<!ApiResponse>} handler
+ * @param {function(express.Request):!Promise.<!ApiResponse>} handler
  * @return {function(express.Request, express.Response)}
  */
 function makeExpressHandler(handler) {
-  return (req, res, next) => {
+  return function expressHandler(req, res, next) {
     let handlerResult
     try {
       handlerResult = handler(req)
     } catch (err) {
-      if (err instanceof ApiError) {
-        return res.status(err.status).send({error: err.message})
+      if (err instanceof Response) {
+        err.respond(res)
+        return
       }
-      return next(err)
+      throw err
     }
 
     const promise = handlerResult instanceof Promise
@@ -194,16 +221,14 @@ function makeExpressHandler(handler) {
         : Promise.resolve(handlerResult)
 
     promise.then((result) => {
-      if (result instanceof ApiResponse) {
-        return res.status(result.status).send({data: result.data})
+      if (result instanceof Response) {
+        result.respond(res)
+      } else {
+        // Attempt to just send down an untyped result
+        console.error(`Received untyped response ${result}`)
+        res.send(result)
       }
-      // Attempt to just send down an untyped result
-      res.send(result)
-    }, (err) => {
-      if (err instanceof ApiError) {
-        return res.status(err.status).send({error: err.message})
-      }
-      return next(err)
     })
+    .catch(next)
   }
 }

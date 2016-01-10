@@ -8,7 +8,6 @@
   "engines": {
     "node": "4.1.2"
   },
-
   "dependencies": {
     "body-parser": "1.14.1",
     "cookie-parser": "1.4.0",
@@ -17,9 +16,9 @@
     "foreman": "1.4.1",
     "immutable": "3.7.5",
     "jade": "1.11.0",
-    "morgan": "1.6.1"
+    "morgan": "1.6.1",
+    "serve-favicon": "2.3.0"
   },
-
   "devDependencies": {
     "supertest": "1.1.0"
   }
