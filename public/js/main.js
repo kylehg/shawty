@@ -1,6 +1,7 @@
 /**
  * @fileoverview Main public JavaScript
  */
+(function () {
 'use strict'
 
 var getIjData
@@ -12,7 +13,7 @@ function main() {
     return ijData[name]
   }
   delete window.__ijData__
-  console.log('Main JS loaded', ijData)
+  console.log('Main JS loaded')
 }
 
 /**
@@ -99,3 +100,5 @@ function clearError() {
 }
 
 main()
+
+}())
