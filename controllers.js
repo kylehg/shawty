@@ -205,29 +205,19 @@ function getUrlRecordByTargetUrl(targetUrl) {
  */
 function makeExpressHandler(handler) {
   return function expressHandler(req, res, next) {
-    let handlerResult
-    try {
-      handlerResult = handler(req)
-    } catch (err) {
+    let promise = new Promise((resolve) => resolve(handler(req)))
+    .then((result) => {
+      if (result instanceof Response) {
+        return result.respond(res)
+      }
+      // Attempt to just send down an untyped result
+      console.error(`Received untyped response ${result}`)
+      res.send(result)
+    }, (err) => {
       if (err instanceof Response) {
-        err.respond(res)
-        return
+        return err.respond(res)
       }
       throw err
-    }
-
-    const promise = handlerResult instanceof Promise
-        ? handlerResult
-        : Promise.resolve(handlerResult)
-
-    promise.then((result) => {
-      if (result instanceof Response) {
-        result.respond(res)
-      } else {
-        // Attempt to just send down an untyped result
-        console.error(`Received untyped response ${result}`)
-        res.send(result)
-      }
     })
     .catch(next)
   }
