@@ -61,7 +61,7 @@ const UrlRecord = immutable.Record({
 exports.showHome = makeExpressHandler((req) => {
   return new TemplateResponse('index', {
     title: 'Shawty',
-    host: `${config.host}/`,
+    host: `${config.host}/`.replace('http://', ''),
   })
 })
 
