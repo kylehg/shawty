@@ -1,5 +1,5 @@
 /**
- * @fileoverview Convenience objects for responding to HTTP requests
+ * @fileoverview Convenience objects for responding to HTTP requests.
  */
 'use strict'
 

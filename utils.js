@@ -1,5 +1,5 @@
 /**
- * @fileoverview Miscellaneous utility functions
+ * @fileoverview Miscellaneous utility functions.
  */
 'use strict'
 

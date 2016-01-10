@@ -1,5 +1,5 @@
 /**
- * @fileoverview Methods for shortening and looking up URLs
+ * @fileoverview Methods for shortening and looking up URLs.
  */
 'use strict'
 

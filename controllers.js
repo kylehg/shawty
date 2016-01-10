@@ -1,32 +1,30 @@
 /**
- * @fileoverview Main application controllers
+ * @fileoverview Main application controllers.
  */
 'use strict'
 
-const config = require('./config')
 const responses = require('./responses')
 
 class Controllers {
-  constructor(config, req, shortenerService) {
+  constructor(config, shortenerService) {
     this._config = config
-    this._req = req
     this._shortenerService = shortenerService
   }
 
-  showHome() {
+  showHome(req, res, next) {
     return new responses.TemplateResponse('index', {
       title: 'Shawty',
-      host: `${config.host}/`.replace('http://', ''),
+      host: `${this._config.host}/`.replace('http://', ''),
       ijData: JSON.stringify({
-        host: config.host,
+        host: this._config.host,
       }),
     })
   }
 
-  shortenUrl() {
-    const url = this._req.body.url && this._req.body.url.trim()
-    const customPath = this._req.body.customPath &&
-        this._req.body.customPath.trim()
+  shortenUrl(req, res, next) {
+    const url = req.body.url && req.body.url.trim()
+    const customPath = req.body.customPath &&
+        req.body.customPath.trim()
     if (!url) {
       throw new responses.ApiError(400, 'Missing "url" field')
     }
@@ -40,22 +38,21 @@ class Controllers {
     return createPromise.then((urlRecord) => {
       return new responses.ApiResponse(201, {
         url: urlRecord.targetUrl,
-        shortUrl: `${config.host}/${urlRecord.shortPath}`,
+        shortUrl: `${this._config.host}/${urlRecord.shortPath}`,
         path: urlRecord.shortPath,
       })
     })
   }
 
-  statShortPath() {
-    const path = this._req.params.shortPath
+  statShortPath(req, res, next) {
+    const path = req.params.shortPath
     return this._shortenerService.getUrlRecordByPath(path).then((urlRecord) => {
       return new responses.ApiResponse(200, urlRecord.toJS())
     })
   }
 
-  // TODO figure out route
-  redirectShortPath() {
-    const path = this._req.params.shortPath
+  redirectShortPath(req, res, next) {
+    const path = req.params.shortPath
     this._shortenerService.getUrlRecordByPath(path).then((urlRecord) => {
       if (!urlRecord) return next()
       res.redirect(urlRecord.targetUrl)

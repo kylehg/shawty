@@ -1,7 +1,8 @@
 /**
- * @fileoverview Main app
+ * @fileoverview Main app.
  */
 'use strict'
+
 const Firebase = require('firebase')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
@@ -77,7 +78,6 @@ function getController(name) {
     // Setup injector
     const ij = new di.Injector()
       .constant('config', config)
-      .constant('req', req)
       .constant('Promise', Promise)
       .factory('firebase', (config) => new Firebase(config.firebaseUrl))
       .ctor('db', FirebaseClient)
@@ -86,15 +86,16 @@ function getController(name) {
       .ctor('shortenerService', ShortenerService)
 
     ij.get('controllers').then((controllers) => {
-      return controllers[name]()
+      return controllers[name](req, res, next)
     })
     .then((result) => {
       if (result instanceof responses.Response) {
         return result.respond(res)
+      } else if (result) {
+        // Attempt to just send down an untyped result
+        console.error(`Received untyped response ${result}`)
+        res.send(result)
       }
-      // Attempt to just send down an untyped result
-      console.error(`Received untyped response ${result}`)
-      res.send(result)
     }, (err) => {
       if (err instanceof responses.Response) {
         return err.respond(res)
