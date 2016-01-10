@@ -3,9 +3,16 @@
  */
 'use strict'
 
+var getIjData
+
 function main() {
   $('.js-submit').on('submit', onSubmit)
-  console.log('Main JS loaded')
+  var ijData = window.__ijData__
+  getIjData = function getIjData(name) {
+    return ijData[name]
+  }
+  delete window.__ijData__
+  console.log('Main JS loaded', ijData)
 }
 
 /**

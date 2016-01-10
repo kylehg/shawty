@@ -47,6 +47,9 @@ class TemplateResponse extends Response {
   }
 
   respond(res) {
+    this._data.ijData = JSON.stringify({
+      host: config.host,
+    })
     res.render(this._template, this._data)
   }
 }
