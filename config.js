@@ -6,4 +6,4 @@ exports.firebaseUrl = exports.env == 'test'
     : process.env.FIREBASE_URL
 exports.host = exports.env == 'production'
     ? `http://${process.env.HOSTNAME}`
-    : `http://localhost:3000`
+    : 'http://localhost:5000'
