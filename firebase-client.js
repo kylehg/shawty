@@ -6,12 +6,11 @@
 class FirebaseClient {
   /**
    * @param {Firebase} firebase The base Firebase reference.
-   * @param {Function=} opt_Promise An optional Promise implementation to use.
-   *   Defaults to native `Promise` if not provided.
+   * @param {Function} Promise A Promise implementation to use.
    */
-  constructor(firebase, opt_Promise) {
+  constructor(firebase, Promise) {
     this._firebase = firebase
-    this._Promise = opt_Promise ? opt_Promise : Promise
+    this._Promise = Promise
   }
 
   /**

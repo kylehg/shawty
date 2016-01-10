@@ -2,6 +2,7 @@
  * @fileoverview Main app
  */
 'use strict'
+const Firebase = require('firebase')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const express = require('express')
@@ -9,8 +10,12 @@ const logger = require('morgan')
 const path = require('path')
 const serveFavicon = require('serve-favicon')
 
+const Controllers = require('./controllers')
+const FirebaseClient = require('./firebase-client')
+const ShortenerService = require('./shortener-service')
 const config = require('./config')
-const controllers = require('./controllers')
+const di = require('./di')
+const responses = require('./responses')
 
 const app = express()
 
@@ -29,10 +34,10 @@ app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
 // Main handlers
-app.route('/').get(controllers.showHome)
-app.route('/').post(controllers.shortenUrl)
-app.route('/:shortPath').get(controllers.redirectShortPath)
-app.route('/:shortPath/stat').get(controllers.statShortPath)
+app.route('/').get(getController('showHome'))
+app.route('/').post(getController('shortenUrl'))
+app.route('/:shortPath').get(getController('redirectShortPath'))
+app.route('/:shortPath/stat').get(getController('statShortPath'))
 
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
@@ -63,5 +68,43 @@ app.use((err, req, res, next) => {
   })
 })
 
+/**
+ * @param {string} name
+ * @return {function(express.Request, express.Response)}
+ */
+function getController(name) {
+  return function expressHandler(req, res, next) {
+    // Setup injector
+    const ij = new di.Injector()
+      .constant('config', config)
+      .constant('req', req)
+      .constant('Promise', Promise)
+      .factory('db', (config) => {
+        return new FirebaseClient(new Firebase(config.firebaseUrl))
+      })
+      .factory('urlTable', (db) => db.child('urls'))
+      .ctor('controllers', Controllers)
+      .ctor('shortenerService', ShortenerService)
+
+    ij.get('controllers').then((controllers) => {
+      const handler = controllers[name]
+      return handler(req)
+    })
+    .then((result) => {
+      if (result instanceof responses.Response) {
+        return result.respond(res)
+      }
+      // Attempt to just send down an untyped result
+      console.error(`Received untyped response ${result}`)
+      res.send(result)
+    }, (err) => {
+      if (err instanceof responses.Response) {
+        return err.respond(res)
+      }
+      throw err
+    })
+    .catch(next)
+  }
+}
 
 module.exports = app
