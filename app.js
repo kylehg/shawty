@@ -14,6 +14,7 @@ const serveFavicon = require('serve-favicon')
 const Controllers = require('./controllers')
 const FirebaseClient = require('./firebase-client')
 const ShortenerService = require('./shortener-service')
+const StatsService = require('./stats-service')
 const config = require('./config')
 const di = require('./di')
 const responses = require('./responses')
@@ -82,11 +83,13 @@ function getController(name) {
       .factory('firebase', (config) => new Firebase(config.firebaseUrl))
       .ctor('db', FirebaseClient)
       .factory('urlTable', (db) => db.child('urls'))
+      .factory('statsTable', (db) => db.child('stats'))
       .ctor('controllers', Controllers)
       .ctor('shortenerService', ShortenerService)
+      .ctor('statsService', StatsService)
 
     ij.get('controllers').then((controllers) => {
-      return controllers[name](req, res, next)
+      return controllers[name](req, res)
     })
     .then((result) => {
       if (result instanceof responses.Response) {

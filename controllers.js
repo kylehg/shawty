@@ -3,15 +3,17 @@
  */
 'use strict'
 
+const model = require('./model')
 const responses = require('./responses')
 
 class Controllers {
-  constructor(config, shortenerService) {
+  constructor(config, shortenerService, statsService) {
     this._config = config
     this._shortenerService = shortenerService
+    this._statsService = statsService
   }
 
-  showHome(req, res, next) {
+  showHome(req, res) {
     return new responses.TemplateResponse('index', {
       title: 'Shawty',
       host: `${this._config.host}/`.replace('http://', ''),
@@ -21,7 +23,7 @@ class Controllers {
     })
   }
 
-  shortenUrl(req, res, next) {
+  shortenUrl(req, res) {
     const url = req.body.url && req.body.url.trim()
     const customPath = req.body.customPath &&
         req.body.customPath.trim()
@@ -44,17 +46,32 @@ class Controllers {
     })
   }
 
-  statShortPath(req, res, next) {
+  statShortPath(req, res) {
     const path = req.params.shortPath
     return this._shortenerService.getUrlRecordByPath(path).then((urlRecord) => {
       return new responses.ApiResponse(200, urlRecord.toJS())
     })
   }
 
-  redirectShortPath(req, res, next) {
+  redirectShortPath(req, res) {
     const path = req.params.shortPath
-    this._shortenerService.getUrlRecordByPath(path).then((urlRecord) => {
-      if (!urlRecord) return next()
+    let urlRecord
+    this._shortenerService.getUrlRecordByPath(path).then((result) => {
+      if (!result) {
+        throw new responses.ApiError(404, 'Not Found')
+      }
+
+      urlRecord = result
+      return this._statsService.record(new model.UrlHit({
+        shortPath: urlRecord.shortPath,
+        targetUrl: urlRecord.targetUrl,
+        occurredAt: Date.now(),
+        requestHeaders: req.headers,
+        requestQuery: req.query,
+        requestBody: req.body,
+      }))
+    })
+    .then(() => {
       res.redirect(urlRecord.targetUrl)
     })
   }

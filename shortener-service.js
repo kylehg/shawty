@@ -5,14 +5,8 @@
 
 const immutable = require('immutable')
 
+const model = require('./model')
 const utils = require('./utils')
-
-const UrlRecord = immutable.Record({
-  targetUrl: '',
-  shortPath: '',
-  createdAt: 0,
-  isCustomPath: false,
-})
 
 class ShortenerService {
   constructor(urlTable) {
@@ -67,7 +61,7 @@ class ShortenerService {
    * @return {!Promise.<!UrlRecord>}
    */
   putUrlRecord(path, url, opt_isCustomPath) {
-    const record = new UrlRecord({
+    const record = new model.UrlRecord({
       targetUrl: url,
       shortPath: path,
       createdAt: Date.now(),
@@ -82,7 +76,7 @@ class ShortenerService {
    */
   getUrlRecordByPath(shortPath) {
     return this._urlTable.get(shortPath)
-      .then((snapshot) => snapshot.val() && new UrlRecord(snapshot.val()))
+      .then((snapshot) => snapshot.val() && new model.UrlRecord(snapshot.val()))
   }
 
   /**
@@ -101,7 +95,7 @@ class ShortenerService {
           console.error(
               `Found multiple paths for ${targetUrl}: ${records.length}`)
         }
-        return records[0] ? new UrlRecord(records[0]) : null
+        return records[0] ? new model.UrlRecord(records[0]) : null
       })
   }
 }
