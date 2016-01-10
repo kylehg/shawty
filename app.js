@@ -78,17 +78,15 @@ function getController(name) {
     const ij = new di.Injector()
       .constant('config', config)
       .constant('req', req)
-      .constant('Promise', Promise)
       .factory('db', (config) => {
-        return new FirebaseClient(new Firebase(config.firebaseUrl))
+        return new FirebaseClient(new Firebase(config.firebaseUrl), Promise)
       })
       .factory('urlTable', (db) => db.child('urls'))
       .ctor('controllers', Controllers)
       .ctor('shortenerService', ShortenerService)
 
     ij.get('controllers').then((controllers) => {
-      const handler = controllers[name]
-      return handler(req)
+      return controllers[name]()
     })
     .then((result) => {
       if (result instanceof responses.Response) {
