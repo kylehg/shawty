@@ -59,7 +59,10 @@ const UrlRecord = immutable.Record({
 })
 
 exports.showHome = makeExpressHandler((req) => {
-  return new TemplateResponse('index', {title: 'Shawty'})
+  return new TemplateResponse('index', {
+    title: 'Shawty',
+    host: `${config.host}/`,
+  })
 })
 
 exports.shortenUrl = makeExpressHandler((req) => {
@@ -208,8 +211,9 @@ function makeExpressHandler(handler) {
     } catch (err) {
       if (err instanceof Response) {
         err.respond(res)
+        return
       }
-      return next(err)
+      throw err
     }
 
     const promise = handlerResult instanceof Promise

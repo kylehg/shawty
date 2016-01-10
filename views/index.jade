@@ -1,6 +1,27 @@
 extends layout
 
 block content
-  div(class="main")
-    input(type="url" class="urlInput js-urlInput" placeholder="http://link.to.shorten.now")
+  div(class="container")
 
+    form(class="shortenForm js-submit ")
+      h2 Enter a URL to shorten
+
+      div(class="js-errorMessage alert hidden" role="alert")
+
+      div(class="form-group")
+        label(for="inputUrl" class="sr-only") URL
+        input(
+          type="url"
+          id="inputUrl"
+          class="js-inputUrl form-control"
+          placeholder="http://example.com"
+          required
+          autofocus)
+
+      div(class="form-group")
+        label(for="inputCustomPath" class="sr-only") Custom path
+        div(class="input-group")
+          div(class="input-group-addon")= host
+          input(type="text" id="inputCustomPath" class="js-inputCustomPath form-control")
+
+      button(class="btn btn-lg btn-primary btn-block" type="submit") Shorten
