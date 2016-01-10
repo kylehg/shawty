@@ -78,9 +78,9 @@ function getController(name) {
     const ij = new di.Injector()
       .constant('config', config)
       .constant('req', req)
-      .factory('db', (config) => {
-        return new FirebaseClient(new Firebase(config.firebaseUrl), Promise)
-      })
+      .constant('Promise', Promise)
+      .factory('firebase', (config) => new Firebase(config.firebaseUrl))
+      .ctor('db', FirebaseClient)
       .factory('urlTable', (db) => db.child('urls'))
       .ctor('controllers', Controllers)
       .ctor('shortenerService', ShortenerService)
