@@ -10,4 +10,4 @@ dev: node_modules
 	NODE_ENV=development ./node_modules/.bin/nf start
 
 test: node_modules
-	NODE_ENV=test mocha
+	NODE_ENV=test ./node_modules/.bin/nf run ./node_modules/.bin/mocha
