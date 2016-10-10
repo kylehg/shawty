@@ -6,7 +6,7 @@
     "start": "make run"
   },
   "engines": {
-    "node": "4.1.2"
+    "node": ">=6"
   },
   "dependencies": {
     "body-parser": "1.14.1",
@@ -14,12 +14,14 @@
     "express": "4.13.3",
     "firebase": "2.3.2",
     "foreman": "1.4.1",
+    "ij": "0.1.0",
     "immutable": "3.7.5",
     "jade": "1.11.0",
     "morgan": "1.6.1",
     "serve-favicon": "2.3.0"
   },
   "devDependencies": {
+    "mocha": "^3.1.0",
     "supertest": "1.1.0"
   }
 }

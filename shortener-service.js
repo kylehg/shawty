@@ -5,6 +5,7 @@
 
 const immutable = require('immutable')
 
+const responses = require('./responses')
 const utils = require('./utils')
 
 const UrlRecord = immutable.Record({

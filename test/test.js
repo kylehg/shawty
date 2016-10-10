@@ -12,7 +12,7 @@ const FirebaseClient = require('../firebase-client')
 const app = require('../app')
 const config = require('../config')
 
-const db = new FirebaseClient(new Firebase(config.firebaseUrl))
+const db = new FirebaseClient(new Firebase(config.firebaseUrl), Promise)
 const urlTable = db.child('urls')
 
 afterEach(() => {
@@ -23,10 +23,8 @@ describe('GET /', () => {
   it('should respond with a heartbeat', (done) => {
     supertest(app)
       .get('/')
-      .expect('Content-Type', /json/)
-      .expect(200, {
-        data: {status: 'ok'}
-      })
+      .expect('Content-Type', /html/)
+      .expect(200)
       .end(done)
   })
 })
@@ -96,7 +94,7 @@ describe('POST /', () => {
           .expect(201, {
             data: {
               url: 'http://news.ycombinator.com',
-              shortUrl: 'http://localhost:3000/Dk9fl',
+              shortUrl: 'http://localhost:5000/Dk9fl',
               path: 'Dk9fl',
             }
           })

@@ -7,6 +7,7 @@ const Firebase = require('firebase')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const express = require('express')
+const ij = require('ij')
 const logger = require('morgan')
 const path = require('path')
 const serveFavicon = require('serve-favicon')
@@ -15,7 +16,6 @@ const Controllers = require('./controllers')
 const FirebaseClient = require('./firebase-client')
 const ShortenerService = require('./shortener-service')
 const config = require('./config')
-const di = require('./di')
 const responses = require('./responses')
 
 const app = express()
@@ -76,16 +76,16 @@ app.use((err, req, res, next) => {
 function getController(name) {
   return function expressHandler(req, res, next) {
     // Setup injector
-    const ij = new di.Injector()
+    const registry = new ij.Registry()
       .constant('config', config)
       .constant('Promise', Promise)
-      .factory('firebase', (config) => new Firebase(config.firebaseUrl))
+      .fn('firebase', (config) => new Firebase(config.firebaseUrl))
       .ctor('db', FirebaseClient)
-      .factory('urlTable', (db) => db.child('urls'))
+      .fn('urlTable', (db) => db.child('urls'))
       .ctor('controllers', Controllers)
       .ctor('shortenerService', ShortenerService)
 
-    ij.get('controllers').then((controllers) => {
+    registry.build('controllers').then((controllers) => {
       return controllers[name](req, res, next)
     })
     .then((result) => {
