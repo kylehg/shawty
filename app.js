@@ -3,10 +3,12 @@
  */
 'use strict'
 
+require('babel-register')
+
 const Firebase = require('firebase')
+const Koa = require('koa')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
-const express = require('express')
 const ij = require('ij')
 const logger = require('morgan')
 const path = require('path')
@@ -18,7 +20,7 @@ const ShortenerService = require('./shortener-service')
 const config = require('./config')
 const responses = require('./responses')
 
-const app = express()
+const app = new Koa()
 
 // Middleware setup
 
